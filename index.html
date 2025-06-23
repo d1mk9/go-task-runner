@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Менеджер задач</title>
+</head>
+<body>
+  <h1>🎯 Создание и проверка задач</h1>
+
+  <!-- Кнопка создания задачи -->
+  <button onclick="createTask()">Создать задачу</button>
+
+  <p id="createdTaskInfo"></p>
+
+  <hr>
+
+  <!-- Ввод ID задачи -->
+  <label for="taskId">ID задачи:</label>
+  <input type="text" id="taskId" placeholder="Вставь ID из ответа">
+  <button onclick="checkStatus()">Проверить статус</button>
+
+  <pre id="taskStatusOutput"></pre>
+
+  <script>
+    function createTask() {
+      fetch('http://localhost:8080/tasks', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('createdTaskInfo').innerText = 'Создана задача с ID: ' + data.id;
+          document.getElementById('taskId').value = data.id;
+        })
+        .catch(err => {
+          alert('Ошибка при создании задачи');
+          console.error(err);
+        });
+    }
+
+    function checkStatus() {
+      const id = document.getElementById('taskId').value.trim();
+      if (!id) {
+        alert('Введите ID задачи');
+        return;
+      }
+
+      fetch(`http://localhost:8080/tasks/${id}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Задача не найдена');
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById('taskStatusOutput').innerText = JSON.stringify(data, null, 2);
+        })
+        .catch(err => {
+          document.getElementById('taskStatusOutput').innerText = 'Ошибка: ' + err.message;
+        });
+    }
+  </script>
+</body>
+</html>
